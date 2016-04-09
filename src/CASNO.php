@@ -18,7 +18,7 @@ class CASNO
         *
         * @return true | false
      */
-    public function check($value)
+    public static function check($value)
     {
         //$pattern = '/^(\d{2,7})-(\d{2})-(\d)$/';
         $pattern = '/^(\d{2,8})-(\d{2})-(\d)$/';
