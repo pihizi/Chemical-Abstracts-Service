@@ -1,9 +1,23 @@
 <?php
+/**
+* @file CASNO.php
+* @brief Chemical-Reagent CAS No. 
+* @author PiHiZi <pihizi@msn.com>
+* @version 0.1.0
+* @date 2016-04-09
+ */
 
-namespace ChemicalAbstractsService;
+namespace ChemicalReagent;
 
-class Number 
+class CASNO
 {
+    /**
+        * @brief 
+        *
+        * @param $value
+        *
+        * @return true | false
+     */
     public function check($value)
     {
         //$pattern = '/^(\d{2,7})-(\d{2})-(\d)$/';

@@ -1,9 +1,9 @@
 {
-    "name": "pihizi/chemical-abstracts-service",
+    "name": "pihizi/chemical-reagent",
     "type": "library",
     "description": "PHP library for CAS",
-    "keywords": ["CAS"],
-    "homepage": "https://github.com/pihizi/chemical-abstracts-service",
+    "keywords": ["CAS", "Chemical Reagent"],
+    "homepage": "https://github.com/pihizi/chemical-reagent",
     "license": "MIT",
 
     "authors": [
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ChemicalAbstractsService\\": "src/"
+            "ChemicalReagent\\": "src/"
         }
     }
 }
