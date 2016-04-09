@@ -18,10 +18,9 @@ class CASNO
         *
         * @return true | false
      */
-    public static function verify($value)
+    public static function verify($value, $strict=true)
     {
-        //$pattern = '/^(\d{2,7})-(\d{2})-(\d)$/';
-        $pattern = '/^(\d{2,8})-(\d{2})-(\d)$/';
+        $pattern = $strict ? '/^(\d{2,7})-(\d{2})-(\d)$/' : '/^(\d{2,8})-(\d{2})-(\d)$/';
         if (!preg_match($pattern, $value, $matches)) {
             return false;
         }
