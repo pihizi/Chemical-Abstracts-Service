@@ -1,44 +1,55 @@
 <?php
 
-namespace ChemicalReagent\Conversion;
+namespace ChemicalReagent;
 
-abstract class Value
+class Conversion
 {
+    private static $native;
+    private static $map = [];
 
-    protected static $native;
-    protected static $map = [];
-
-    protected $value;
-    protected $unit;
-
-    private static function _parse($value)
-    {
-        $units = implode('|', array_keys(static::$map));
-        if ($units) {
-            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)/']);
-        }
-        if ($pattern && preg_match($pattern, $value, $mathces)) {
-            list(,$value, $unit, $count) = $matches;
-            return [$value*$count, $unit];
-        }
-        return [];
-    }
+    private $value;
+    private $unit;
 
     /**
         * @brief 
         *
         * @param $string
-        *       5ml
-        *       5ml*3
+        * @param $maps
+        *       [
+        *           [
+        *               'ml'=> 1,
+        *               'ul'=> 1000,
+        *               'μl'=> 1000,
+        *               'cl'=> 0.1,
+        *               'dl'=> 0.01,
+        *               'l'=> 0.001,
+        *           ],
+        *           [
+        *               'g'=> 1,
+        *               'ug'=> 1000000,
+        *               'μg'=> 1000000,
+        *               'mg'=> 1000,
+        *               'kg'=> 0.001,
+        *           ]
+        *       ]
+        *
         * @return 
      */
-    public function __construct($string)
+    public function __construct($string, array $maps=[])
     {
         $value = self::_parse($string);
         if (!empty($value)) {
             list($value, $unit) = $value;
             $this->value = $value;
             $this->unit = $unit;
+            foreach ($maps as $map) {
+                $keys = array_keys($map);
+                if (in_array($this->unit, $keys)) {
+                    self::$map = $map;
+                    self::$native = $keys[0];
+                    break;
+                }
+            }
         }
     }
 
@@ -47,7 +58,7 @@ abstract class Value
         $value = self::_parse($string);
         if (empty($value)) return $this;
         list($value, $unit) = $value;
-        $newValue = @static::convert($unit, $this->unit, $value);
+        $newValue = @self::convert($unit, $this->unit, $value);
         if (false===$newValue) return $this;
         $this->value += $newValue;
         return $this;
@@ -58,7 +69,7 @@ abstract class Value
         $value = self::_parse($string);
         if (empty($value)) return $this;
         list($value, $unit) = $value;
-        $newValue = @static::convert($unit, $this->unit, $value);
+        $newValue = @self::convert($unit, $this->unit, $value);
         if (false===$newValue) return $this;
         $this->value -= $newValue;
         return $this;
@@ -76,22 +87,22 @@ abstract class Value
 
     public function to($unit)
     {
-        $this->value = static::convert($this->unit, $unit, $this->value);
+        $this->value = self::convert($this->unit, $unit, $this->value);
         $this->unit = $unit;
         return $this;
     }
 
-    protected static function convert($from, $to, $value)
+    private static function convert($from, $to, $value)
     {
-        return ($value * static::getConversionRate($from)) / static::getConversionRate($to);
+        return ($value * self::getConversionRate($from)) / self::getConversionRate($to);
     }
 
-    protected static function getConversionRate($unit)
+    private static function getConversionRate($unit)
     {
-        if (!isset(static::$map[$unit])) {
+        if (!isset(self::$map[$unit])) {
             throw new \ChemicalReagent\Exception("Undefined unit: {$unit}");
         }
-        return static::$map[$unit];
+        return self::$map[$unit];
     }
 
     private static function _foramt($decimals=3, $decPoint='.', $thousandSep=',')
@@ -102,10 +113,10 @@ abstract class Value
     public function beautify()
     {
         $myLen = strlen($this->value);
-        $units = array_keys(static::$maps);
+        $units = array_keys(self::$map);
         foreach ($units as $unit) {
             if ($unit===$this->unit) continue;
-            $newValue =static::convert($this->unit, $unit, $this->value) ;
+            $newValue = self::convert($this->unit, $unit, $this->value) ;
             $newLen = strlen($newValue);
             if ($newLen<$myLen || ($newLen==$myLen && strpos($newValue, '.')===false)) {
                 $myLen = $newLen;
@@ -123,7 +134,20 @@ abstract class Value
 
     public function toString()
     {
-        $this->to(static::$native);
+        $this->to(self::$native);
         return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
+    }
+
+    private static function _parse($value)
+    {
+        $units = implode('|', array_keys(self::$map));
+        if ($units) {
+            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)/']);
+        }
+        if ($pattern && preg_match($pattern, $value, $mathces)) {
+            list(,$value, $unit, $count) = $matches;
+            return [$value*$count, $unit];
+        }
+        return [];
     }
 }
