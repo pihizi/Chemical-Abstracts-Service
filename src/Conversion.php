@@ -42,6 +42,9 @@ class Conversion
             list($value, $unit) = $value;
             $this->value = $value;
             $this->unit = $unit;
+            if (empty($maps)) {
+                $maps = self::_getDefaultMaps();
+            }
             foreach ($maps as $map) {
                 $keys = array_keys($map);
                 if (in_array($this->unit, $keys)) {
@@ -51,6 +54,27 @@ class Conversion
                 }
             }
         }
+    }
+
+    private static function _getDefaultMaps()
+    {
+        return [
+            [
+                'ml'=> 1,
+                'ul'=> 1000,
+                'μl'=> 1000,
+                'cl'=> 0.1,
+                'dl'=> 0.01,
+                'l'=> 0.001,
+            ],
+            [
+                'g'=> 1,
+                'ug'=> 1000000,
+                'μg'=> 1000000,
+                'mg'=> 1000,
+                'kg'=> 0.001,
+            ]
+        ];
     }
 
     public function add($string)
