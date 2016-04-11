@@ -35,7 +35,7 @@ class Conversion
         *
         * @return 
      */
-    public function __construct($string, array $maps=[])
+    public function __construct($string, array $maps=[], $native='')
     {
         $value = self::_parse($string);
         if (!empty($value)) {
@@ -49,7 +49,7 @@ class Conversion
                 $keys = array_keys($map);
                 if (in_array($this->unit, $keys)) {
                     self::$map = $map;
-                    self::$native = $keys[0];
+                    self::$native = $in_array($native, $keys) ? $native : $keys[0];
                     break;
                 }
             }
