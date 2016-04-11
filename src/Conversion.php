@@ -100,7 +100,7 @@ class Conversion
     private static function getConversionRate($unit)
     {
         if (!isset(self::$map[$unit])) {
-            throw new \ChemicalReagent\Exception("Undefined unit: {$unit}");
+            throw new Exception("Undefined unit: {$unit}");
         }
         return self::$map[$unit];
     }
