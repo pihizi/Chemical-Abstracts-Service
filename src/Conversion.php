@@ -53,7 +53,7 @@ class Conversion
     {
         $units = implode('|', array_keys($map));
         if ($units) {
-            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)?/']);
+            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)?)?/']);
         }
         if ($pattern && preg_match($pattern, $value, $matches)) {
             $value = $matches[1];
