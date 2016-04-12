@@ -146,7 +146,7 @@ class Conversion
 
     private static function convert($from, $to, $value)
     {
-        return ($value * self::getConversionRate($from)) / self::getConversionRate($to);
+        return ($value * self::getConversionRate($to)) / self::getConversionRate($from);
     }
 
     private static function getConversionRate($unit)
@@ -157,9 +157,9 @@ class Conversion
         return self::$map[$unit];
     }
 
-    private static function _foramt($decimals=3, $decPoint='.', $thousandSep=',')
+    private static function _format($value, $decimals=3, $decPoint='.', $thousandSep=',')
     {
-        return number_format($this->value, $decimals, $decPoint, $thousandSep);
+        return number_format($value, $decimals, $decPoint, $thousandSep);
     }
 
     public function beautify($decimals=3, $decPoint='.', $thousandSep=',')
@@ -176,18 +176,18 @@ class Conversion
                 $this->unit = $unit;
             }
         }
-        return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
+        return self::_format($this->value, $decimals, $decPoint, $thousandSep) . $this->unit;
     }
 
     public function out($decimals=3, $decPoint='.', $thousandSep=',')
     {
-        return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
+        return self::_format($this->value, $decimals, $decPoint, $thousandSep) . $this->unit;
     }
 
-    public function toString()
+    public function __toString()
     {
         @$this->to(self::$native);
-        return self::_foramt() . $this->unit;
+        return self::_format($this->value) . $this->unit;
     }
 
 }
