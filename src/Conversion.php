@@ -186,8 +186,8 @@ class Conversion
 
     public function toString()
     {
-        $this->to(self::$native);
-        return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
+        @$this->to(self::$native);
+        return self::_foramt() . $this->unit;
     }
 
 }
