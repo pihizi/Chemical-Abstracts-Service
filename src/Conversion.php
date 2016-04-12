@@ -35,25 +35,53 @@ class Conversion
         *
         * @return 
      */
-    public function __construct($string, array $maps=[], $native='')
+    public function __construct($string, array $maps=[])
     {
-        $value = self::_parse($string);
+        $maps = empty($maps) ? self::_getDefaultMaps() : $maps;
+        $value = self::_init($string, $maps);
         if (!empty($value)) {
-            list($value, $unit) = $value;
+            list($value, $unit, $map) = $value;
+            $keys = array_keys($map);
             $this->value = $value;
             $this->unit = $unit;
-            if (empty($maps)) {
-                $maps = self::_getDefaultMaps();
+            self::$map = $map;
+            self::$native = $keys[0];
+        }
+    }
+
+    private static function _getMatches($string, $map)
+    {
+        $units = implode('|', array_keys($map));
+        if ($units) {
+            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)?/']);
+        }
+        if ($pattern && preg_match($pattern, $value, $matches)) {
+            $value = $matches[1];
+            $unit = $matches[2];
+            if (isset($matches[3])) {
+                $value *= $matches[3];
             }
-            foreach ($maps as $map) {
-                $keys = array_keys($map);
-                if (in_array($this->unit, $keys)) {
-                    self::$map = $map;
-                    self::$native = $in_array($native, $keys) ? $native : $keys[0];
-                    break;
-                }
+            return [$value, $unit];
+        }
+        return [];
+    }
+
+    private static function _init($string, array $maps=[])
+    {
+        if (empty($maps)) return [];
+        foreach ($maps as $map) {
+            $matches = self::_getMatches($string, $map);
+            if (!empty($matches)) {
+                return array_merge($matches, [$map]);
             }
         }
+        return [];
+    }
+
+    private static function _parse($string, array $map=[])
+    {
+        if (empty($map)) return [];
+        return self::_getMatches($string, $map);
     }
 
     private static function _getDefaultMaps()
@@ -79,7 +107,7 @@ class Conversion
 
     public function add($string)
     {
-        $value = self::_parse($string);
+        $value = self::_parse($string, self::$map);
         if (empty($value)) return $this;
         list($value, $unit) = $value;
         $newValue = @self::convert($unit, $this->unit, $value);
@@ -90,7 +118,7 @@ class Conversion
 
     public function sub($string)
     {
-        $value = self::_parse($string);
+        $value = self::_parse($string, self::$map);
         if (empty($value)) return $this;
         list($value, $unit) = $value;
         $newValue = @self::convert($unit, $this->unit, $value);
@@ -134,7 +162,7 @@ class Conversion
         return number_format($this->value, $decimals, $decPoint, $thousandSep);
     }
 
-    public function beautify()
+    public function beautify($decimals=3, $decPoint='.', $thousandSep=',')
     {
         $myLen = strlen($this->value);
         $units = array_keys(self::$map);
@@ -148,7 +176,7 @@ class Conversion
                 $this->unit = $unit;
             }
         }
-        return self::_foramt() . $this->unit;
+        return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
     }
 
     public function out($decimals=3, $decPoint='.', $thousandSep=',')
@@ -162,16 +190,4 @@ class Conversion
         return self::_foramt($decimals, $decPoint, $thousandSep) . $this->unit;
     }
 
-    private static function _parse($value)
-    {
-        $units = implode('|', array_keys(self::$map));
-        if ($units) {
-            $pattern = implode('', ['/(\d+(?:\.\d+)?)\s*(', $units, ')\s*(?:\*|\x|\X)\s*(\d+(?:\.\d+)?)/']);
-        }
-        if ($pattern && preg_match($pattern, $value, $mathces)) {
-            list(,$value, $unit, $count) = $matches;
-            return [$value*$count, $unit];
-        }
-        return [];
-    }
 }
